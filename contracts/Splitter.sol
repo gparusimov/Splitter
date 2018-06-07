@@ -2,11 +2,11 @@ pragma solidity ^0.4.18;
 
 contract Splitter {
 
-	address owner;
+	address private owner;
 
 	mapping(address => uint256) public balances;
 
-	event LogSplit(address sender, address recipient,  uint amount);
+	event LogSplit(address sender, address recipient1, uint firstAmount, address recipient2, uint secondAmount);
 	event LogWithdraw(address  sender, uint value);
 
 	function Splitter()
@@ -15,21 +15,23 @@ contract Splitter {
 		owner = msg.sender;
 	}
 
-	function split(address bob, address carol)
+	function split(address recipient1, address recipient2)
  	 public
 	 payable
 	{
     require(msg.value != 0);
-		require(bob != 0);
-		require(carol != 0);
+		require(recipient1 != 0);
+		require(recipient2 != 0);
 
-		uint firstAmount = msg.value/2;
-		balances[bob] += firstAmount;
-		LogSplit(msg.sender, bob, firstAmount);
-
-		uint secondAmount = msg.value - firstAmount;
-		balances[carol] += secondAmount;
-		LogSplit(msg.sender, carol, secondAmount);
+		if (msg.value % 2 == 1){
+				 balances[recipient1] += msg.value/2 + 1;
+				 balances[recipient2] += msg.value/2;
+				 LogSplit(msg.sender, recipient1, msg.value/2 + 1, recipient2, msg.value/2);
+		 } else {
+				 balances[recipient1] += msg.value/2;
+				 balances[recipient2] += msg.value/2;
+				 LogSplit(msg.sender, recipient1, msg.value/2, recipient2, msg.value/2);
+				 }
 	}
 
 	function withdraw()
